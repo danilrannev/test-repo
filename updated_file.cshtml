@@ -1,0 +1,712 @@
+@using eDiscoveryAI.CustomPage.Models
+@model JobSelectionViewModel
+ 
+<link rel="stylesheet" href="~/Content/MassAction.css" />
+ 
+@using (Html.BeginForm("SubmitJob", "Home", FormMethod.Post, new { id = "jobForm", onsubmit = "showSubmittingOverlay()" }))
+{
+    <div class="page-container">
+        <div class="page-header">
+            <img src="~/Content/Images/eDiscoveryAI-logo.png" alt="eDiscovery AI Logo" class="logo" />
+            <span class="bi bi-x-circle close-icon" onclick="closeModal()"></span>
+        </div>
+        <div class="page-body">
+            <div class="form-container">
+                <div class="form-content">
+                    <div class="form-card">
+                        @Html.HiddenFor(m => m.DatabaseToken)
+                        <div class="flex-col">
+                            @Html.HiddenFor(m => m.TemplateExists)
+                            @Html.ValidationMessageFor(m => m.TemplateExists, "")
+                        </div>
+                        <div class="flex-col">
+                            @Html.HiddenFor(m => m.DocumentCount)
+                            @Html.ValidationMessageFor(m => m.DocumentCount, "")
+                        </div>
+                        <div class="flex-col">
+                            @Html.LabelFor(m => m.JobName)
+                            @Html.TextBoxFor(m => m.JobName, new { @placeholder = "" })
+                            @Html.ValidationMessageFor(m => m.JobName, "")
+                        </div>
+ 
+                        <div class="flex-col">
+                            @Html.LabelFor(m => m.MatterNumber)
+                            @Html.TextBoxFor(m => m.MatterNumber, new { @placeholder = "" })
+                        </div>
+ 
+                        <div class="flex-col mt-10">
+                            <label for="typeofjob">What Type of Job Would You Like to Submit?</label>
+                            <div id="typeofjob" name="JobType">
+                                <label class="radio-container">
+                                    Relevance
+                                    @Html.RadioButtonFor(m => m.JobType, "Relevance")
+                                    <span class="checkmark"></span>
+                                </label>
+                                <label class="radio-container">
+                                    Privilege
+                                    @Html.RadioButtonFor(m => m.JobType, "Privilege")
+                                    <span class="checkmark"></span>
+                                </label>
+                                <label class="radio-container">
+                                    PII Detect and Extract
+                                    @Html.RadioButtonFor(m => m.JobType, "PII Detect and Extract")
+                                    <span class="checkmark"></span>
+                                </label>
+                                <label class="radio-container">
+                                    Early Case Intelligence
+                                    @Html.RadioButtonFor(m => m.JobType, "Early Case Intelligence")
+                                    <span class="checkmark"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+ 
+                    <!-- Dynamic Forms Based on Job Type -->
+                    <div class="form-card mt-10">
+                        <!-- Relevance Form -->
+                        <div id="relevance" class="@(Model.JobType == "Relevance" ? "" : "hidden")">
+                            <h2 class="section-title">
+                                Relevance
+                                <span class="bi bi-info-circle tooltip-icon" data-tooltip="Placeholder tooltip text"></span>
+                            </h2>
+                            <div id="issues" class="flex-col gap-lg">
+                                <div class="flex-col">
+                                    @Html.LabelFor(m => m.GeneralInformation)
+                                    @Html.TextAreaFor(m => m.GeneralInformation, new { @placeholder = "", @rows = "2" })
+                                    @Html.ValidationMessageFor(m => m.GeneralInformation, "")
+                                </div>
+                                @if (Model.Issues != null && Model.Issues.Count > 0)
+                                {
+                                    var index = 0;
+                                    var indexLabel = 1;
+                                    foreach (var issue in Model.Issues)
+                                    {
+                                        <div class="issue-card">
+                                            <div class="flex-col gap-lg">
+                                                <h2 class="section-subtitle issue-header">
+                                                    Issue @indexLabel
+                                                    <span class="bi bi-x-circle close-icon remove-issue" onclick="removeIssue(this)"></span>
+                                                </h2>
+                                                <div class="flex-col">
+                                                    @Html.LabelFor(m => m.Issues[index].Prompt)
+                                                    @Html.TextAreaFor(m => m.Issues[index].Prompt, new { @placeholder = "", @rows = "2" })
+                                                    @Html.ValidationMessageFor(m => m.Issues[index].Prompt, "")
+                                                </div>
+                                                <div class="flex-col">
+                                                    @Html.LabelFor(m => m.Issues[index].Field)
+                                                    <div class="custom-dropdown-wrapper">
+                                                        @Html.DropDownListFor(
+                                                            m => m.Issues[index].Field,
+                                                            Model.IssueFieldOptions,
+                                                            "Select Single-Choice Field",
+                                                            new { @class = "custom-dropdown" }
+                                                        )
+                                                        <span class="bi bi-caret-down-fill custom-dropdown-caret-icon"></span>
+                                                    </div>
+                                                    @Html.ValidationMessageFor(m => m.Issues[index].Field, "")
+                                                </div>
+                                            </div>
+                                        </div>
+                                        index++;
+                                        indexLabel++;
+                                    }
+                                }
+                                else
+                                {
+                                    <!-- Default Issue 1 if no issues exist in the model -->
+                                    <div class="issue-card">
+                                        <div class="flex-col gap-lg">
+                                            <h2 class="section-subtitle issue-header">Issue 1</h2>
+                                            <div class="flex-col">
+                                                @Html.LabelFor(m => m.Issues[0].Prompt)
+                                                @Html.TextAreaFor(m => m.Issues[0].Prompt, new { @placeholder = "", @rows = "2" })
+                                            </div>
+                                            <div class="flex-col">
+                                                @Html.LabelFor(m => m.Issues[0].Field)
+                                                <div class="custom-dropdown-wrapper">
+                                                    @Html.DropDownListFor(
+                                                        m => m.Issues[0].Field,
+                                                        Model.IssueFieldOptions,
+                                                        "Select Single-Choice Field",
+                                                        new { @class = "custom-dropdown" }
+                                                    )
+                                                    <span class="bi bi-caret-down-fill custom-dropdown-caret-icon"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div>
+                                <div class="flex" style="justify-content: flex-end;">
+                                    <button type="button" class="btn add-issue mt-20">+ Add Issue</button>
+                                </div>
+                                <div class="flex-col mt-20">
+                                    <label for="pdfhandling">PDF Handling</label>
+                                    <label class="checkbox-container">
+                                        Review PDFs as Images
+                                        <input type="checkbox" id="ReviewPdfsAsImages" name="ReviewPdfsAsImages" value="true" class="hidden-checkbox" @(Model.ReviewPdfsAsImages ? "checked" : "") />
+                                        <span class="box-checkmark"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+ 
+                        <!-- Privilege Form -->
+                        <div id="privilege" class="@(Model.JobType == "Privilege" ? "" : "hidden")">
+                            <h2 class="section-title">
+                                Privilege
+                                <span class="bi bi-info-circle tooltip-icon" data-tooltip="Placeholder tooltip text"></span>
+                            </h2>
+                            <div class="flex-col gap-lg">
+                                <div class="flex-col">
+                                    <div class="flex-col">
+                                        <label for="privilegetype">Privilege Types</label>
+                                        <div name="privilegetype">
+                                            <div>
+                                                <label class="checkbox-container">
+                                                    Attorney-Client
+                                                    <input type="checkbox" id="AttorneyClient" name="AttorneyClient" value="true" class="hidden-checkbox" @(Model.AttorneyClient ? "checked" : "") />
+                                                    <span class="box-checkmark"></span>
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <label class="checkbox-container">
+                                                    Work Product
+                                                    <input type="checkbox" id="WorkProduct" name="WorkProduct" value="true" class="hidden-checkbox" @(Model.WorkProduct ? "checked" : "") />
+                                                    <span class="box-checkmark"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="privtypes" class="flex-col gap-lg">
+                                        @if (Model.CustomPrivTypes != null && Model.CustomPrivTypes.Count > 0)
+                                        {
+                                            var index = 0;
+                                            var indexLabel = 1;
+ 
+                                            foreach (var privtype in Model.CustomPrivTypes)
+                                            {
+                                                <div class="privtype-card">
+                                                    <div class="flex-col gap-lg">
+                                                        <h2 class="section-subtitle priv-header">
+                                                            Custom Priv Type @indexLabel
+                                                            <span class="bi bi-x-circle close-icon remove-privtype" onclick="removePrivType(this)"></span>
+                                                        </h2>
+                                                        <div class="flex-col">
+                                                            @Html.LabelFor(m => m.CustomPrivTypes[index].CustomPrivilegeName)
+                                                            @Html.TextBoxFor(m => m.CustomPrivTypes[index].CustomPrivilegeName, new { @placeholder = "" })
+                                                            @Html.ValidationMessageFor(m => m.CustomPrivTypes[index].CustomPrivilegeName, "")
+                                                        </div>
+                                                        <div class="flex-col">
+                                                            @Html.LabelFor(m => m.CustomPrivTypes[index].CustomPrivilegePrompt)
+                                                            @Html.TextAreaFor(m => m.CustomPrivTypes[index].CustomPrivilegePrompt, new { @placeholder = "", @rows = "2" })
+                                                            @Html.ValidationMessageFor(m => m.CustomPrivTypes[index].CustomPrivilegePrompt, "")
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                index++;
+                                                indexLabel++;
+                                            }
+                                        }
+                                    </div>
+                                    <div class="flex" style="justify-content: flex-end;">
+                                        <button type="button" class="btn add-privtype mt-20">+ Add Custom Priv Type</button>
+                                    </div>
+                                    @Html.ValidationMessageFor(m => m.PrivilegeTypeGroup, "")
+                                </div>
+                                <div class="flex-2col">
+                                    <div class="flex-col half-width">
+                                        @Html.LabelFor(m => m.AttorneyList)
+                                        @Html.TextAreaFor(m => m.AttorneyList, new { @placeholder = "", @rows = "2" })
+                                        @Html.ValidationMessageFor(m => m.AttorneyList, "")
+                                    </div>
+                                    <div class="flex-col half-width">
+                                        @Html.LabelFor(m => m.SafeDomains)
+                                        @Html.TextAreaFor(m => m.SafeDomains, new { @placeholder = "", @rows = "2" })
+                                        @Html.ValidationMessageFor(m => m.SafeDomains, "")
+                                    </div>
+                                </div>
+                                <div class="flex-2col">
+                                    <div class="flex-col half-width">
+                                        @Html.LabelFor(m => m.Classification)
+                                        <div class="custom-dropdown-wrapper">
+                                            @Html.DropDownListFor(
+                                                m => m.Classification,
+                                                Model.ClassificationOptions,
+                                                "Select Single-Choice Field",
+                                                new { @class = "custom-dropdown" }
+                                            )
+                                            <span class="bi bi-caret-down-fill custom-dropdown-caret-icon"></span>
+                                        </div>
+                                        @Html.ValidationMessageFor(m => m.Classification, "")
+                                    </div>
+                                    <div class="flex-col half-width">
+                                        @Html.LabelFor(m => m.Explanation)
+                                        <div class="custom-dropdown-wrapper">
+                                            @Html.DropDownListFor(
+                                                m => m.Explanation,
+                                                Model.ExplanationOptions,
+                                                "Select Long Text Field",
+                                                new { @class = "custom-dropdown" }
+                                            )
+                                            <span class="bi bi-caret-down-fill custom-dropdown-caret-icon"></span>
+                                        </div>
+                                        @Html.ValidationMessageFor(m => m.Explanation, "")
+                                    </div>
+                                </div>
+                                <div class="flex-2col">
+                                    <div class="flex-col half-width">
+                                        @Html.LabelFor(m => m.TypeResult)
+                                        <div class="custom-dropdown-wrapper">
+                                            @Html.DropDownListFor(
+                                                m => m.TypeResult,
+                                                Model.TypeResultOptions,
+                                                "Select Multi-Choice Field",
+                                                new { @class = "custom-dropdown" }
+                                            )
+                                            <span class="bi bi-caret-down-fill custom-dropdown-caret-icon"></span>
+                                        </div>
+                                        @Html.ValidationMessageFor(m => m.TypeResult, "")
+                                    </div>
+                                    <div class="flex-col half-width">
+                                        @Html.LabelFor(m => m.LogEntry)
+                                        <div class="custom-dropdown-wrapper">
+                                            @Html.DropDownListFor(
+                                                m => m.LogEntry,
+                                                Model.LogEntryOptions,
+                                                "Select Long Text Field",
+                                                new { @class = "custom-dropdown" }
+                                            )
+                                            <span class="bi bi-caret-down-fill custom-dropdown-caret-icon"></span>
+                                        </div>
+                                        @Html.ValidationMessageFor(m => m.LogEntry, "")
+                                    </div>
+                                </div>
+                                <div class="flex-col">
+                                    @Html.LabelFor(m => m.HitResult)
+                                    <div class="custom-dropdown-wrapper">
+                                        @Html.DropDownListFor(
+                                            m => m.HitResult,
+                                            Model.HitResultOptions,
+                                            "Select Long Text Field",
+                                            new { @class = "custom-dropdown" }
+                                        )
+                                        <span class="bi bi-caret-down-fill custom-dropdown-caret-icon"></span>
+                                    </div>
+                                    @Html.ValidationMessageFor(m => m.HitResult, "")
+                                </div>
+                            </div>
+                        </div>
+ 
+                        <!-- PII Detect & Extract Form -->
+                        <div id="piiDetectExtract" class="@(Model.JobType == "PII Detect and Extract" ? "" : "hidden")">
+                            <h2 class="section-title">
+                                PII Detect
+                                <span class="bi bi-info-circle tooltip-icon" data-tooltip="Placeholder tooltip text"></span>
+                            </h2>
+                            <div class="flex-col gap-lg">
+                                <!--<div class="flex-col">
+                                    @*
+                                    @Html.LabelFor(m => m.DetectionTemplate)
+                                    <div class="custom-dropdown-wrapper">
+                                        @Html.DropDownListFor(
+                                            m => m.DetectionTemplate,
+                                            Model.DetectionTemplateOptions,
+                                            "Select Template",
+                                            new { @class = "custom-dropdown" }
+                                        )
+                                        <span class="bi bi-caret-down-fill custom-dropdown-caret-icon"></span>
+                                    </div>
+                                    @Html.ValidationMessageFor(m => m.DetectionTemplate, "")
+                                    *@
+                                </div>-->
+                                <div class="flex-col">
+                                    @Html.LabelFor(m => m.DetectionField)
+                                    <div class="custom-dropdown-wrapper">
+                                        @Html.DropDownListFor(
+                                            m => m.DetectionField,
+                                            Model.DetectionFieldOptions,
+                                            "Select Multi-Choice Field",
+                                            new { @class = "custom-dropdown" }
+                                        )
+                                        <span class="bi bi-caret-down-fill custom-dropdown-caret-icon"></span>
+                                    </div>
+                                    @Html.ValidationMessageFor(m => m.DetectionField, "")
+                                </div>
+                            </div>
+                            <h2 class="section-title">
+                                PII Extract
+                                <span class="bi bi-info-circle tooltip-icon" data-tooltip="Placeholder tooltip text"></span>
+                            </h2>
+                            <div class="flex-col gap-lg">
+                                <label class="checkbox-container">
+                                    Extract PII
+                                    <input type="checkbox" id="ExtractPii" name="ExtractPii" value="true" class="hidden-checkbox" @(Model.ExtractPii ? "checked" : "") />
+                                    <span class="box-checkmark"></span>
+                                </label>
+                                <div class="flex-col hidden" id="extractPiiFieldSection">
+                                    @Html.LabelFor(m => m.ExtractionField)
+                                    <div class="custom-dropdown-wrapper">
+                                        @Html.DropDownListFor(
+                                            m => m.ExtractionField,
+                                            Model.ExtractionFieldOptions,
+                                            "Select Multi-Object Field",
+                                            new { @class = "custom-dropdown" }
+                                        )
+                                        <span class="bi bi-caret-down-fill custom-dropdown-caret-icon"></span>
+                                    </div>
+                                    @Html.ValidationMessageFor(m => m.ExtractionField, "")
+                                </div>
+                            </div>
+                        </div>
+ 
+                        <!-- Early Case Intelligence Form -->
+                        <div id="earlycase" class="@(Model.JobType == "Early Case Intelligence" ? "" : "hidden")">
+                            <h2 class="section-title">
+                                Early Case Intelligence
+                                <span class="bi bi-info-circle tooltip-icon" data-tooltip="Placeholder tooltip text"></span>
+                            </h2>
+                            <div class="flex-col gap-lg">
+                                <div class="flex-col">
+                                    @Html.LabelFor(m => m.CaseBackground)
+                                    @Html.TextAreaFor(m => m.CaseBackground, new { @placeholder = "", @rows = "4" })
+                                    @Html.ValidationMessageFor(m => m.CaseBackground, "")
+                                </div>
+                                <div class="flex-col">
+                                    @Html.LabelFor(m => m.RelevantDescription)
+                                    @Html.TextAreaFor(m => m.RelevantDescription, new { @placeholder = "", @rows = "2" })
+                                    @Html.ValidationMessageFor(m => m.RelevantDescription, "")
+                                </div>
+                                <div class="flex-col">
+                                    @Html.LabelFor(m => m.NotRelevantDescription)
+                                    @Html.TextAreaFor(m => m.NotRelevantDescription, new { @placeholder = "", @rows = "2" })
+                                    @Html.ValidationMessageFor(m => m.NotRelevantDescription, "")
+                                </div>
+                                <div class="flex-2col">
+                                    <div class="flex-col half-width">
+                                        @Html.LabelFor(m => m.ClassificationResults)
+                                        <div class="custom-dropdown-wrapper">
+                                            @Html.DropDownListFor(
+                                                m => m.ClassificationResults,
+                                                Model.ClassificationResultsOptions,
+                                                "Select Single-Choice Field",
+                                                new { @class = "custom-dropdown" }
+                                            )
+                                            <span class="bi bi-caret-down-fill custom-dropdown-caret-icon"></span>
+                                        </div>
+                                        @Html.ValidationMessageFor(m => m.ClassificationResults, "")
+                                    </div>
+                                    <div class="flex-col half-width">
+                                        @Html.LabelFor(m => m.SummaryResults)
+                                        <div class="custom-dropdown-wrapper">
+                                            @Html.DropDownListFor(
+                                                m => m.SummaryResults,
+                                                Model.SummaryResultsOptions,
+                                                "Select Long Text Field",
+                                                new { @class = "custom-dropdown" }
+                                            )
+                                            <span class="bi bi-caret-down-fill custom-dropdown-caret-icon"></span>
+                                        </div>
+                                        @Html.ValidationMessageFor(m => m.SummaryResults, "")
+                                    </div>
+                                </div>
+                                <div class="flex-2col">
+                                    <div class="flex-col half-width">
+                                        @Html.LabelFor(m => m.DocumentTypeResults)
+                                        <div class="custom-dropdown-wrapper">
+                                            @Html.DropDownListFor(
+                                                m => m.DocumentTypeResults,
+                                                Model.DocumentTypeResultsOptions,
+                                                "Select Multi-Choice Field",
+                                                new { @class = "custom-dropdown" }
+                                            )
+                                            <span class="bi bi-caret-down-fill custom-dropdown-caret-icon"></span>
+                                        </div>
+                                        @Html.ValidationMessageFor(m => m.DocumentTypeResults, "")
+                                    </div>
+                                    <div class="flex-col half-width">
+                                        @Html.LabelFor(m => m.RelevantTopicResults)
+                                        <div class="custom-dropdown-wrapper">
+                                            @Html.DropDownListFor(
+                                                m => m.RelevantTopicResults,
+                                                Model.RelevantTopicResultsOptions,
+                                                "Select Multi-Choice Field",
+                                                new { @class = "custom-dropdown" }
+                                            )
+                                            <span class="bi bi-caret-down-fill custom-dropdown-caret-icon"></span>
+                                        </div>
+                                        @Html.ValidationMessageFor(m => m.RelevantTopicResults, "")
+                                    </div>
+                                </div>
+                                <div class="flex-2col">
+                                    <div class="flex-col half-width">
+                                        @Html.LabelFor(m => m.NotRelevantTopicResults)
+                                        <div class="custom-dropdown-wrapper">
+                                            @Html.DropDownListFor(
+                                                m => m.NotRelevantTopicResults,
+                                                Model.NotRelevantTopicResultsOptions,
+                                                "Select Multi-Choice Field",
+                                                new { @class = "custom-dropdown" }
+                                            )
+                                            <span class="bi bi-caret-down-fill custom-dropdown-caret-icon"></span>
+                                        </div>
+                                        @Html.ValidationMessageFor(m => m.NotRelevantTopicResults, "")
+                                    </div>
+                                    <div class="flex-col half-width">
+                                        @Html.LabelFor(m => m.InappropriateContentResults)
+                                        <div class="custom-dropdown-wrapper">
+                                            @Html.DropDownListFor(
+                                                m => m.InappropriateContentResults,
+                                                Model.InappropriateContentResultsOptions,
+                                                "Select Multi-Choice Field",
+                                                new { @class = "custom-dropdown" }
+                                            )
+                                            <span class="bi bi-caret-down-fill custom-dropdown-caret-icon"></span>
+                                        </div>
+                                        @Html.ValidationMessageFor(m => m.InappropriateContentResults, "")
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-footer">
+            <input type="submit" value="Submit" id="submit" />
+        </div>
+    </div>
+}
+ 
+<div id="preSubmitOverlay" class="job-overlay hidden">
+    <div class="job-overlay-content">
+        <h2>Submitting Job...</h2>
+    </div>
+</div>
+ 
+<!-- Include your JavaScript files and inline scripts -->
+<script type="text/javascript">
+    function closeModal() {
+        var closeOptions = { type: "close" };
+        window.parent.postMessage(closeOptions, window.parent.origin);
+    }
+</script>
+<script type="text/javascript">
+    function showSubmittingOverlay() {
+        document.getElementById("preSubmitOverlay").classList.remove("hidden");
+    }
+</script>
+<script type="text/javascript">
+    var maxIssues = 15;
+    var maxPrivTypes = 2;
+ 
+    function reNumberIssues() {
+        var issueCards = document.querySelectorAll("#issues .issue-card");
+        for (var i = 0; i < issueCards.length; i++) {
+            var card = issueCards[i];
+            var heading = card.querySelector("h2.section-subtitle");
+            heading.childNodes[0].nodeValue = "Issue " + (i + 1) + " ";
+ 
+            var textarea = card.querySelector("textarea");
+            textarea.id = "issue" + (i + 1) + "prompt";
+            textarea.name = "Issues[" + i + "].Prompt";
+ 
+            var dropdown = card.querySelector("select");
+            dropdown.id = "issue" + (i + 1) + "field";
+            dropdown.name = "Issues[" + i + "].Field";
+        }
+ 
+        updateAddIssueButtonVisibility();
+        updateRemoveIssueButtonsVisibility();
+    }
+ 
+    function removeIssue(button) {
+        var issueCards = document.querySelectorAll("#issues .issue-card");
+        var card = button.closest(".issue-card");
+        card.parentNode.removeChild(card);
+        reNumberIssues();
+    }
+ 
+    function updateRemoveIssueButtonsVisibility() {
+        var issueCards = document.querySelectorAll("#issues .issue-card");
+        var removeButtons = document.querySelectorAll("#issues .remove-issue");
+ 
+        if (issueCards.length === 1) {
+            removeButtons.forEach(function (btn) {
+                btn.style.display = "none";
+            });
+        } else {
+            removeButtons.forEach(function (btn) {
+                btn.style.display = "inline-block";
+            })
+        }
+    }
+ 
+    function updateAddIssueButtonVisibility() {
+        var issueCards = document.querySelectorAll("#issues .issue-card");
+        var addButton = document.querySelector(".add-issue");
+ 
+        if (issueCards.length >= maxIssues) {
+            addButton.style.display = "none";
+        } else {
+            addButton.style.display = "inline-block";
+        }
+    }
+ 
+    document.querySelector(".add-issue").addEventListener("click", addIssue);
+ 
+    function addIssue() {
+        var issueCards = document.querySelectorAll("#issues .issue-card");
+ 
+        if (issueCards.length >= maxIssues) {
+            return;
+        }
+ 
+        var newIndex = issueCards.length + 1;
+ 
+        var options = "";
+        var issueFieldOptions = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.IssueFieldOptions));
+        issueFieldOptions.forEach(function (opt) {
+            options += `<option value="${opt.Value}">${opt.Text}</option>`;
+        });
+ 
+        var newCard = document.createElement("div");
+        newCard.className = "issue-card";
+        newCard.innerHTML = `
+            <div class="flex-col gap-lg">
+                <h2 class="section-subtitle issue-header">
+                    Issue ${newIndex}
+                    <span class="bi bi-x-circle close-icon remove-issue" onclick="removeIssue(this)"></span>
+                </h2>
+                <div class="flex-col">
+                    <label for="issue${newIndex}prompt">Prompt</label>
+                    <textarea id="issue${newIndex}prompt" name="Issues[${newIndex - 1}].Prompt" rows="2"></textarea>
+                </div>
+                <div class="flex-col">
+                    <label for="issue${newIndex}field">Field</label>
+                    <div class="custom-dropdown-wrapper">
+                        <select id="issue${newIndex}field" name="Issues[${newIndex - 1}].Field" class="custom-dropdown">
+                            <option value="">Select Single-Choice Field</option>
+                            ${options}
+                        </select>
+                        <span class="bi bi-caret-down-fill custom-dropdown-caret-icon"></span>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.getElementById("issues").appendChild(newCard);
+        reNumberIssues();
+    }
+ 
+    function reNumberPrivTypes() {
+        var cards = document.querySelectorAll("#privtypes .privtype-card");
+        for (var i = 0; i < cards.length; i++) {
+            var card = cards[i];
+ 
+            var heading = card.querySelector("h2.section-subtitle");
+            heading.childNodes[0].nodeValue = "Custom Priv Type " + (i + 1) + " ";
+ 
+            var nameInput = card.querySelector('input[type="text"]');
+            nameInput.id = "privtypeName" + (i + 1);
+            nameInput.name = "CustomPrivTypes[" + i + "].CustomPrivilegeName";
+ 
+            var textArea = card.querySelector("textarea");
+            textArea.id = "privtypePrompt" + (i + 1);
+            textArea.name = "CustomPrivTypes[" + i + "].CustomPrivilegePrompt";
+        }
+ 
+        updateAddPrivTypeButtonVisibility();
+    }
+ 
+    function removePrivType(button) {
+        var card = button.closest(".privtype-card");
+        card.parentNode.removeChild(card);
+        reNumberPrivTypes();
+    }
+ 
+    function updateAddPrivTypeButtonVisibility() {
+        var privTypeCards = document.querySelectorAll("#privtypes .privtype-card");
+        var addButton = document.querySelector(".add-privtype");
+ 
+        if (privTypeCards.length >= maxPrivTypes) {
+            addButton.style.display = "none";
+        } else {
+            addButton.style.display = "inline-block";
+        }
+    }
+ 
+    document.querySelector(".add-privtype").addEventListener("click", addPrivType);
+ 
+    function addPrivType() {
+        var privTypeCards = document.querySelectorAll("#privtypes .privtype-card");
+ 
+        if (privTypeCards.length >= maxPrivTypes) {
+            return;
+        }
+ 
+        var nextIndex = privTypeCards.length + 1;
+ 
+        var newCard = document.createElement("div");
+        newCard.className = "privtype-card";
+        newCard.innerHTML = `
+            <div class="flex-col gap-lg">
+                <h2 class="section-subtitle priv-header">
+                    Custom Priv Type ${nextIndex}
+                    <span class="bi bi-x-circle close-icon remove-privtype" onclick="removePrivType(this)"></span>
+                </h2>
+                <div class="flex-col">
+                    <label for="privtypeName${nextIndex}">Custom Privilege Name</label>
+                    <input type="text" id="privtypeName${nextIndex}" name="CustomPrivTypes[${nextIndex - 1}].CustomPrivilegeName" />
+                </div>
+                <div class="flex-col">
+                    <label for="privtypePrompt${nextIndex}">Custom Privilege Prompt</label>
+                    <textarea id="privtypePrompt${nextIndex}" name="CustomPrivTypes[${nextIndex - 1}].CustomPrivilegePrompt" rows="2"></textarea>
+                </div>
+            </div>
+        `;
+        document.getElementById("privtypes").appendChild(newCard);
+        reNumberPrivTypes();
+    }
+ 
+    function updateJobTypeDisplay() {
+        var selected = document.querySelector('input[name="JobType"]:checked');
+        var jobType = selected ? selected.value : "";
+ 
+        var relevance = document.getElementById("relevance");
+        var privilege = document.getElementById("privilege");
+        var piiDetectExtract = document.getElementById("piiDetectExtract");
+        var earlycase = document.getElementById("earlycase");
+ 
+        relevance.classList.toggle("hidden", jobType !== "Relevance");
+        privilege.classList.toggle("hidden", jobType !== "Privilege");
+        piiDetectExtract.classList.toggle("hidden", jobType !== "PII Detect and Extract");
+        earlycase.classList.toggle("hidden", jobType !== "Early Case Intelligence");
+    }
+ 
+    document.querySelectorAll('input[name="JobType"]').forEach(function (radio) {
+        radio.addEventListener("change", updateJobTypeDisplay);
+    });
+ 
+    updateJobTypeDisplay();
+ 
+    document.addEventListener("DOMContentLoaded", function () {
+        reNumberIssues();
+        reNumberPrivTypes();
+        var extractCheck = document.getElementById("ExtractPii");
+        var extractSection = document.getElementById("extractPiiFieldSection");
+        if (extractCheck) {
+            extractCheck.addEventListener("change", function () {
+                if (this.checked) {
+                    extractSection.classList.remove("hidden");
+                } else {
+                    extractSection.classList.add("hidden");
+                }
+            });
+ 
+            if (extractCheck.checked) {
+                extractSection.classList.remove("hidden");
+            }
+        }
+    });
+</script>

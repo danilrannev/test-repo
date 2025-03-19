@@ -1,0 +1,1219 @@
+@using eDiscoveryAI.CustomPage.Models
+@model JobSelectionViewModel
+ 
+<link rel="stylesheet" href="~/Content/MassAction.css" />
+ 
+@using (Html.BeginForm("SubmitJob", "Home", FormMethod.Post, new { id = "jobForm", onsubmit = "showSubmittingOverlay()" }))
+{
+    <div class="page-container">
+        <div class="page-header">
+            <div class="container page-header-container">
+                <img src="~/Content/Images/eDiscoveryAI-logo.png" alt="eDiscovery AI Logo" class="logo" />
+                <span class="bi bi-x close-icon no-print" onclick="closeModal()"></span>
+            </div>
+        </div>
+        <div class="page-body container">
+            <div class="page-card">
+                <div class="page-body-header no-print">
+                    <h4 class="page-body-header-title">
+                        Submit New Job
+                    </h4>
+                    <div class="steps-container">
+                        <div class="step-divide hidden" id="step-1-divide"></div>
+                        <div class="step active" id="step-1">
+                            <div class="step-number">
+                                1
+                            </div>
+                            <div class="step-name">
+                                Job Details
+                            </div>
+                        </div>
+                        <div class="step-divide" id="step-2-divide">
+                        </div>
+                        <div class="step" id="step-2">
+                            <div class="step-number">
+                                2
+                            </div>
+                            <div class="step-name">
+                                Job Configuration
+                            </div>
+                        </div>
+                        <div class="step-divide" id="step-3-divide">
+                        </div>
+                        <div class="step" id="step-3">
+                            <div class="step-number">
+                                3
+                            </div>
+                            <div class="step-name">
+                                Preview
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-container">
+                    <div class="form-content">
+                        @Html.HiddenFor(m => m.DatabaseToken)
+                        <div class="flex-col error-container hidden">
+                            @Html.HiddenFor(m => m.TemplateExists)
+                            @Html.ValidationMessageFor(m => m.TemplateExists, "")
+                            @Html.HiddenFor(m => m.DocumentCount)
+                            @Html.ValidationMessageFor(m => m.DocumentCount, "")
+                        </div>
+
+                        <div class="form-step" id="form-step-1">
+                            <div class="section">
+                                <h4 class="section-title">
+                                    Job Details
+                                </h4>
+                                <div class="flex-col">
+                                    @Html.LabelFor(m => m.JobName)
+                                    @Html.TextBoxFor(m => m.JobName, new { @placeholder = "" })
+                                    @Html.ValidationMessageFor(m => m.JobName, "")
+                                </div>
+        
+                                <div class="flex-col">
+                                    @Html.LabelFor(m => m.MatterNumber)
+                                    @Html.TextBoxFor(m => m.MatterNumber, new { @placeholder = "" })
+                                </div>
+                            </div>
+                            <div class="section">
+                                <label class="section-title">
+                                    Select Job Type
+                                </label>
+                                <div class="radio-group" id="typeofjob" name="JobType">
+                                    <label class="radio-container">
+                                        @Html.RadioButtonFor(m => m.JobType, "Relevance")
+                                        <div class="radio-wrapper">
+                                            <img src="./document.svg" width="48" height="48"/>
+                                            <div class="content">
+                                                <span class="job-type">
+                                                    Relevance
+                                                </span>
+                                                <span class="job-type-description">
+                                                    Determine document relevance to case matters
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <label class="radio-container">
+                                        @Html.RadioButtonFor(m => m.JobType, "Privilege")
+                                        <div class="radio-wrapper">
+                                            <img src="./shield.svg" width="48" height="48"/>
+                                            <div class="content">
+                                                <span class="job-type">
+                                                    Privilege
+                                                </span>
+                                                <span class="job-type-description">
+                                                    Identify privileged information in documents
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <label class="radio-container">
+                                        @Html.RadioButtonFor(m => m.JobType, "PII Detect and Extract")
+                                        <div class="radio-wrapper">
+                                            <img src="./profile.svg" width="48" height="48"/>
+                                            <div class="content">
+                                                <span class="job-type">
+                                                    PII Detect and Extract
+                                                </span>
+                                                <span class="job-type-description">
+                                                    Find and extract personally identifiable information
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <label class="radio-container">
+                                        @Html.RadioButtonFor(m => m.JobType, "Early Case Intelligence")
+                                        <div class="radio-wrapper">
+                                            <img src="./intelligence.svg" width="48" height="48"/>
+                                            <div class="content">
+                                                <span class="job-type">
+                                                    Early Case Intelligence
+                                                </span>
+                                                <span class="job-type-description">
+                                                    Gain early insights into case documents
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Forms Based on Job Type -->
+                        <div class="form-step hidden" id="form-step-2">
+                            <a href="#" class="back-step-link"> <span class="bi bi-chevron-left"></span> &nbsp;&nbsp;&nbsp;Back to Job Details </a>
+                            <!-- Relevance Form -->
+                            <div id="relevance" class="@(Model.JobType == "Relevance" ? "" : "hidden")">
+                                <h2 class="section-title">
+                                    Relevance Job Configuration
+                                    <span class="bi bi-info-circle tooltip-icon" data-tooltip="Placeholder tooltip text"></span>
+                                </h2>
+                                <div id="issues" class="flex-col gap-lg">
+                                    <div class="flex-col">
+                                        @Html.LabelFor(m => m.GeneralInformation)
+                                        @Html.TextAreaFor(m => m.GeneralInformation, new { @placeholder = "", @rows = "2" })
+                                        @Html.ValidationMessageFor(m => m.GeneralInformation, "")
+                                    </div>
+                                    @if (Model.Issues != null && Model.Issues.Count > 0)
+                                    {
+                                        var index = 0;
+                                        var indexLabel = 1;
+                                        foreach (var issue in Model.Issues)
+                                        {
+                                            <div class="issue-card">
+                                                <div class="flex-col gap-lg">
+                                                    <h2 class="section-subtitle issue-header">
+                                                        Issue @indexLabel
+                                                        <span class="bi bi-x close-icon remove-issue" onclick="removeIssue(this)"></span>
+                                                    </h2>
+                                                    <div class="flex-col">
+                                                        @Html.LabelFor(m => m.Issues[index].Prompt)
+                                                        @Html.TextAreaFor(m => m.Issues[index].Prompt, new { @placeholder = "", @rows = "2" })
+                                                        @Html.ValidationMessageFor(m => m.Issues[index].Prompt, "")
+                                                    </div>
+                                                    <div class="flex-col">
+                                                        @Html.LabelFor(m => m.Issues[index].Field)
+                                                        <div class="custom-dropdown-wrapper">
+                                                            @Html.DropDownListFor(
+                                                                m => m.Issues[index].Field,
+                                                                Model.IssueFieldOptions,
+                                                                "Select Single-Choice Field",
+                                                                new { @class = "custom-dropdown" }
+                                                            )
+                                                        </div>
+                                                        @Html.ValidationMessageFor(m => m.Issues[index].Field, "")
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            index++;
+                                            indexLabel++;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <div class="issue-card">
+                                            <div class="flex-col gap-lg">
+                                                <h2 class="section-subtitle issue-header">
+                                                    Issue 1
+                                                    <span class="bi bi-x close-icon remove-issue" onclick="removeIssue(this)"></span>
+                                                </h2>
+                                                <div class="flex-col">
+                                                    @Html.LabelFor(m => m.Issues[0].Prompt)
+                                                    @Html.TextAreaFor(m => m.Issues[0].Prompt, new { @placeholder = "", @rows = "2" })
+                                                </div>
+                                                <div class="flex-col">
+                                                    @Html.LabelFor(m => m.Issues[0].Field)
+                                                    <div class="custom-dropdown-wrapper">
+                                                        @Html.DropDownListFor(
+                                                            m => m.Issues[0].Field,
+                                                            Model.IssueFieldOptions,
+                                                            "Select Single-Choice Field",
+                                                            new { @class = "custom-dropdown" }
+                                                        )
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                <div>
+                                    <div class="flex" style="justify-content: flex-end;">
+                                        <button type="button" class="btn add-issue mt-20">+ Add Issue</button>
+                                    </div>
+                                    <div class="flex-col">
+                                        <label for="pdfhandling">PDF Handling</label>
+                                        <label class="checkbox-container">
+                                            Review PDFs as Images
+                                            <!-- Replacing checkbox with plain HTML input; preserving hidden-checkbox class and checkmark span -->
+                                            <input type="checkbox" id="ReviewPdfsAsImages" name="ReviewPdfsAsImages" value="true" class="hidden-checkbox" @(Model.ReviewPdfsAsImages ? "checked" : "") hidden />
+                                            <span class="box-checkmark"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Privilege Form -->
+                            <div id="privilege" class="@(Model.JobType == "Privilege" ? "" : "hidden")">
+                                <div class="section">
+                                    <h4 class="section-title">
+                                        Privilege
+                                    </h4>
+                                    <div class="flex-col">
+                                        <label for="privilegetype">Privilege Types</label>
+                                        <div name="privilegetype">
+                                            <div>
+                                                <label class="checkbox-container">
+                                                    Attorney-Client
+                                                    <input type="checkbox" id="AttorneyClient" name="AttorneyClient" value="true" class="hidden-checkbox" @(Model.AttorneyClient ? "checked" : "") />
+                                                    <span class="box-checkmark"></span>
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <label class="checkbox-container">
+                                                    Work Product
+                                                    <input type="checkbox" id="WorkProduct" name="WorkProduct" value="true" class="hidden-checkbox" @(Model.WorkProduct ? "checked" : "") />
+                                                    <span class="box-checkmark"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div id="privtypes" class="flex-col gap-lg">
+                                            @if (Model.CustomPrivTypes != null && Model.CustomPrivTypes.Count > 0)
+                                            {
+                                                var index = 0;
+                                                var indexLabel = 1;
+    
+                                                foreach (var privtype in Model.CustomPrivTypes)
+                                                {
+                                                    <div class="privtype-card">
+                                                        <div class="flex-col gap-lg">
+                                                            <h2 class="section-subtitle priv-header">
+                                                                Custom Priv Type @indexLabel
+                                                                <span class="bi bi-x close-icon remove-privtype" onclick="removePrivType(this)"></span>
+                                                            </h2>
+                                                            <div class="flex-col">
+                                                                @Html.LabelFor(m => m.CustomPrivTypes[index].CustomPrivilegeName)
+                                                                @Html.TextBoxFor(m => m.CustomPrivTypes[index].CustomPrivilegeName, new { @placeholder = "" })
+                                                                @Html.ValidationMessageFor(m => m.CustomPrivTypes[index].CustomPrivilegeName, "")
+                                                            </div>
+                                                            <div class="flex-col">
+                                                                @Html.LabelFor(m => m.CustomPrivTypes[index].CustomPrivilegePrompt)
+                                                                @Html.TextAreaFor(m => m.CustomPrivTypes[index].CustomPrivilegePrompt, new { @placeholder = "", @rows = "2" })
+                                                                @Html.ValidationMessageFor(m => m.CustomPrivTypes[index].CustomPrivilegePrompt, "")
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    index++;
+                                                    indexLabel++;
+                                                }
+                                            }
+                                        </div>
+                                        <div class="flex" style="justify-content: flex-end;">
+                                            <button type="button" class="btn add-privtype mt-20">+ Add Custom Priv Type</button>
+                                        </div>
+                                        @Html.ValidationMessageFor(m => m.PrivilegeTypeGroup, "")
+                                    </div>
+                                </div>
+                                <div class="section">
+                                    <h4 class="section-title">
+                                        Privileged Parties
+                                    </h4>
+                                    <div class="flex-row flex-wrap">
+                                        <div class="flex-col half-width">
+                                            @Html.LabelFor(m => m.AttorneyList)
+                                            @Html.TextAreaFor(m => m.AttorneyList, new { @placeholder = "", @rows = "2" })
+                                            @Html.ValidationMessageFor(m => m.AttorneyList, "")
+                                        </div>
+                                        <div class="flex-col half-width">
+                                            @Html.LabelFor(m => m.SafeDomains)
+                                            @Html.TextAreaFor(m => m.SafeDomains, new { @placeholder = "", @rows = "2" })
+                                            @Html.ValidationMessageFor(m => m.SafeDomains, "")
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="section">
+                                    <h4 class="section-title">
+                                        Classification & Explanation
+                                    </h4>
+                                    <div class="flex-row flex-wrap">
+                                        <div class="flex-col half-width">
+                                            @Html.LabelFor(m => m.Classification)
+                                            <div class="custom-dropdown-wrapper">
+                                                @Html.DropDownListFor(
+                                                    m => m.Classification,
+                                                    Model.ClassificationOptions,
+                                                    "Select Single-Choice Field",
+                                                    new { @class = "custom-dropdown" }
+                                                )
+                                            </div>
+                                            @Html.ValidationMessageFor(m => m.Classification, "")
+                                        </div>
+                                        <div class="flex-col half-width">
+                                            @Html.LabelFor(m => m.Explanation)
+                                            <div class="custom-dropdown-wrapper">
+                                                @Html.DropDownListFor(
+                                                    m => m.Explanation,
+                                                    Model.ExplanationOptions,
+                                                    "Select Long Text Field",
+                                                    new { @class = "custom-dropdown" }
+                                                )
+                                                <span class="bi bi-chevron-down custom-dropdown-caret-icon"></span>
+                                            </div>
+                                            @Html.ValidationMessageFor(m => m.Explanation, "")
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="section">
+                                    <h4 class="section-title">
+                                        Privilege Determination
+                                    </h4>
+                                    <div class="flex-row flex-wrap">
+                                        <div class="flex-col half-width">
+                                            @Html.LabelFor(m => m.TypeResult)
+                                            <div class="custom-dropdown-wrapper">
+                                                @Html.DropDownListFor(
+                                                    m => m.TypeResult,
+                                                    Model.TypeResultOptions,
+                                                    "Select Multi-Choice Field",
+                                                    new { @class = "custom-dropdown" }
+                                                )
+                                                <span class="bi bi-chevron-down custom-dropdown-caret-icon"></span>
+                                            </div>
+                                            @Html.ValidationMessageFor(m => m.TypeResult, "")
+                                        </div>
+                                        <div class="flex-col half-width">
+                                            @Html.LabelFor(m => m.LogEntry)
+                                            <div class="custom-dropdown-wrapper">
+                                                @Html.DropDownListFor(
+                                                    m => m.LogEntry,
+                                                    Model.LogEntryOptions,
+                                                    "Select Long Text Field",
+                                                    new { @class = "custom-dropdown" }
+                                                )
+                                            </div>
+                                            @Html.ValidationMessageFor(m => m.LogEntry, "")
+                                        </div>
+                                        <div class="flex-col w-full">
+                                            @Html.LabelFor(m => m.HitResult)
+                                            <div class="custom-dropdown-wrapper up">
+                                                @Html.DropDownListFor(
+                                                    m => m.HitResult,
+                                                    Model.HitResultOptions,
+                                                    "Select Long Text Field",
+                                                    new { @class = "custom-dropdown" }
+                                                )
+                                            </div>
+                                            @Html.ValidationMessageFor(m => m.HitResult, "")
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PII Detect & Extract Form -->
+                            <div id="piiDetectExtract">
+                                
+                                <div class="section">
+                                    <h4 class="section-title">
+                                        PII Detect
+                                    </h4>
+                                    <div class="flex-col gap-lg">
+                                        <div class="flex-col">
+                                            @Html.LabelFor(m => m.DetectionField)
+                                            <div class="custom-dropdown-wrapper">
+                                                @Html.DropDownListFor(
+                                                    m => m.DetectionField,
+                                                    Model.DetectionFieldOptions,
+                                                    "Select Multi-Choice Field",
+                                                    new { @class = "custom-dropdown" }
+                                                )
+                                                <span class="bi bi-chevron-down custom-dropdown-caret-icon"></span>
+                                            </div>
+                                            @Html.ValidationMessageFor(m => m.DetectionField, "")
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="section">
+                                    <h4 class="section-title">
+                                        PII Extract
+                                    </h4>
+                                    <div class="flex-col gap-lg">
+                                        <div class="flex-col gap-lg">
+                                            <label class="checkbox-container">
+                                                Extract PII
+                                                <input type="checkbox" id="ExtractPii" name="ExtractPii" value="true" class="hidden-checkbox" @(Model.ExtractPii ? "checked" : "")/>
+                                                <span class="box-checkmark"></span>
+                                            </label>
+                                            <div class="flex-col hidden" id="extractPiiFieldSection">
+                                                @Html.LabelFor(m => m.ExtractionField)
+                                                <div class="custom-dropdown-wrapper">
+                                                    @Html.DropDownListFor(
+                                                        m => m.ExtractionField,
+                                                        Model.ExtractionFieldOptions,
+                                                        "Select Multi-Object Field",
+                                                        new { @class = "custom-dropdown" }
+                                                    )
+                                                    <span class="bi bi-chevron-down custom-dropdown-caret-icon"></span>
+                                                </div>
+                                                @Html.ValidationMessageFor(m => m.ExtractionField, "")
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Early Case Intelligence Form -->
+                            <div id="earlycase" class="@(Model.JobType == "Early Case Intelligence" ? "" : "hidden")">
+                                <div class="section">
+                                    <h4 class="section-title">
+                                        Early Case Intelligence
+                                    </h4>
+                                    <div class="flex-col">
+                                        @Html.LabelFor(m => m.CaseBackground)
+                                        @Html.TextAreaFor(m => m.CaseBackground, new { @placeholder = "", @rows = "4" })
+                                        @Html.ValidationMessageFor(m => m.CaseBackground, "")
+                                    </div>
+                                    <div class="flex-col">
+                                        @Html.LabelFor(m => m.RelevantDescription)
+                                        @Html.TextAreaFor(m => m.RelevantDescription, new { @placeholder = "", @rows = "2" })
+                                        @Html.ValidationMessageFor(m => m.RelevantDescription, "")
+                                    </div>
+                                    <div class="flex-col">
+                                        @Html.LabelFor(m => m.NotRelevantDescription)
+                                        @Html.TextAreaFor(m => m.NotRelevantDescription, new { @placeholder = "", @rows = "2" })
+                                        @Html.ValidationMessageFor(m => m.NotRelevantDescription, "")
+                                    </div>
+                                </div>
+                                <div class="section">
+                                    <h4 class="section-title">
+                                        Analysis & Findings
+                                    </h4>
+                                    <div class="flex-row flex-wrap">
+                                        <div class="flex-col half-width">
+                                            @Html.LabelFor(m => m.ClassificationResults)
+                                            <div class="custom-dropdown-wrapper">
+                                                @Html.DropDownListFor(
+                                                    m => m.ClassificationResults,
+                                                    Model.ClassificationResultsOptions,
+                                                    "Select Single-Choice Field",
+                                                    new { @class = "custom-dropdown" }
+                                                )
+                                            </div>
+                                            @Html.ValidationMessageFor(m => m.ClassificationResults, "")
+                                        </div>
+                                        <div class="flex-col half-width">
+                                            @Html.LabelFor(m => m.SummaryResults)
+                                            <div class="custom-dropdown-wrapper">
+                                                @Html.DropDownListFor(
+                                                    m => m.SummaryResults,
+                                                    Model.SummaryResultsOptions,
+                                                    "Select Long Text Field",
+                                                    new { @class = "custom-dropdown" }
+                                                )
+                                            </div>
+                                            @Html.ValidationMessageFor(m => m.SummaryResults, "")
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="section">
+                                    <h4 class="section-title">
+                                        Content Categorization
+                                    </h4>
+                                    <div class="flex-row flex-wrap">
+                                        <div class="flex-col half-width">
+                                            @Html.LabelFor(m => m.DocumentTypeResults)
+                                            <div class="custom-dropdown-wrapper">
+                                                @Html.DropDownListFor(
+                                                    m => m.DocumentTypeResults,
+                                                    Model.DocumentTypeResultsOptions,
+                                                    "Select Multi-Choice Field",
+                                                    new { @class = "custom-dropdown" }
+                                                )
+                                            </div>
+                                            @Html.ValidationMessageFor(m => m.DocumentTypeResults, "")
+                                        </div>
+                                        <div class="flex-col half-width">
+                                            @Html.LabelFor(m => m.RelevantTopicResults)
+                                            <div class="custom-dropdown-wrapper">
+                                                @Html.DropDownListFor(
+                                                    m => m.RelevantTopicResults,
+                                                    Model.RelevantTopicResultsOptions,
+                                                    "Select Multi-Choice Field",
+                                                    new { @class = "custom-dropdown" }
+                                                )
+                                            </div>
+                                            @Html.ValidationMessageFor(m => m.RelevantTopicResults, "")
+                                        </div>
+                                    </div>
+                                    <div class="flex-row flex-wrap">
+                                        <div class="flex-col half-width">
+                                            @Html.LabelFor(m => m.NotRelevantTopicResults)
+                                            <div class="custom-dropdown-wrapper">
+                                                @Html.DropDownListFor(
+                                                    m => m.NotRelevantTopicResults,
+                                                    Model.NotRelevantTopicResultsOptions,
+                                                    "Select Multi-Choice Field",
+                                                    new { @class = "custom-dropdown" }
+                                                )
+                                            </div>
+                                            @Html.ValidationMessageFor(m => m.NotRelevantTopicResults, "")
+                                        </div>
+                                        <div class="flex-col half-width">
+                                            @Html.LabelFor(m => m.InappropriateContentResults)
+                                            <div class="custom-dropdown-wrapper">
+                                                @Html.DropDownListFor(
+                                                    m => m.InappropriateContentResults,
+                                                    Model.InappropriateContentResultsOptions,
+                                                    "Select Multi-Choice Field",
+                                                    new { @class = "custom-dropdown" }
+                                                )
+                                            </div>
+                                            @Html.ValidationMessageFor(m => m.InappropriateContentResults, "")
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-step hidden" id="form-step-3">
+                            <a href="#" class="back-step-link no-print"> <span class="bi bi-chevron-left"></span> &nbsp;&nbsp;&nbsp;Back to Job Configuration </a>
+                            <div id="preview">
+                                <div class="section">
+                                    <div class="section-title no-print">
+                                        Job Preview
+                                    </div>
+                                    <div class="flex-col" id="preview-content">
+                                        <div class="section-large-title" id="preview-job-title">
+                                            
+                                        </div>
+                                        <div class="section-medium-title" id="preview-matter-number">
+                                            
+                                        </div>
+                                        <div class="section-medium-title" id="preview-job-type">
+                                            
+                                        </div>
+                                        <div class="flex-col job-configuration" id="job-configuration"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-footer no-print">
+            <div class="page-footer-wrapper container flex">
+                <a href="#" class="btn btn-outline" id="back" disabled>Back</a>
+                <div class="flex submission-buttons">
+                    <a href="#" class="btn" id="next">Next</a>
+                    <a href="#" class="btn btn-secondary" id="print" hidden>Print</a>
+                    <input type="submit" value="Submit" id="submit" hidden/>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div id="preSubmitOverlay" class="job-overlay hidden">
+    <div class="job-overlay-content">
+        <h2>Submitting Job...</h2>
+    </div>
+</div>
+
+<!-- Include your JavaScript files and inline scripts -->
+<script type="text/javascript">
+    function closeModal() {
+        var closeOptions = { type: "close" };
+        window.parent.postMessage(closeOptions, window.parent.origin);
+    }
+</script>
+<script type="text/javascript">
+    function showSubmittingOverlay() {
+        document.getElementById("preSubmitOverlay").classList.remove("hidden");
+    }
+</script>
+<script type="text/javascript">
+    var maxIssues = 15;
+    var maxPrivTypes = 2;
+    var currentStep = 1;
+    var totalSteps = 3;
+
+    function reNumberIssues() {
+        var issueCards = document.querySelectorAll("#issues .issue-card");
+        for (var i = 0; i < issueCards.length; i++) {
+            var card = issueCards[i];
+            var heading = card.querySelector("h2.section-subtitle");
+            heading.childNodes[0].nodeValue = "Issue " + (i + 1) + " ";
+
+            var textarea = card.querySelector("textarea");
+            textarea.id = "issue" + (i + 1) + "prompt";
+            textarea.name = "Issues[" + i + "].Prompt";
+
+            var dropdown = card.querySelector("select");
+            dropdown.id = "issue" + (i + 1) + "field";
+            dropdown.name = "Issues[" + i + "].Field";
+        }
+
+        updateAddIssueButtonVisibility();
+        updateRemoveIssueButtonsVisibility();
+    }
+
+    function removeIssue(button) {
+        var issueCards = document.querySelectorAll("#issues .issue-card");
+        var card = button.closest(".issue-card");
+        card.parentNode.removeChild(card);
+        reNumberIssues();
+    }
+
+    function updateRemoveIssueButtonsVisibility() {
+        var issueCards = document.querySelectorAll("#issues .issue-card");
+        var removeButtons = document.querySelectorAll("#issues .remove-issue");
+
+        if (issueCards.length === 1) {
+            removeButtons.forEach(function (btn) {
+                btn.style.display = "none";
+            });
+        } else {
+            removeButtons.forEach(function (btn) {
+                btn.style.display = "inline-block";
+            })
+        }
+    }
+
+    function updateAddIssueButtonVisibility() {
+        var issueCards = document.querySelectorAll("#issues .issue-card");
+        var addButton = document.querySelector(".add-issue");
+
+        if (issueCards.length >= maxIssues) {
+            addButton.style.display = "none";
+        } else {
+            addButton.style.display = "inline-block";
+        }
+    }
+
+    document.querySelector(".add-issue").addEventListener("click", addIssue);
+
+    function addIssue() {
+        var issueCards = document.querySelectorAll("#issues .issue-card");
+
+        if (issueCards.length >= maxIssues) {
+            return;
+        }
+
+        var newIndex = issueCards.length + 1;
+
+        var options = "";
+        // Assuming issueFieldOptions is provided as a JavaScript variable
+        var issueFieldOptions = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.IssueFieldOptions));
+        issueFieldOptions.forEach(function (opt) {
+            options += `<option value="${opt.Value}">${opt.Text}</option>`;
+        });
+
+        var newCard = document.createElement("div");
+        newCard.className = "issue-card";
+        newCard.innerHTML = `
+            <div class="flex-col gap-lg">
+                <h2 class="section-subtitle issue-header">
+                    Issue ${newIndex}
+                    <span class="bi bi-x close-icon remove-issue" onclick="removeIssue(this)"></span>
+                </h2>
+                <div class="flex-col">
+                    <label for="issue${newIndex}prompt">Prompt</label>
+                    <textarea id="issue${newIndex}prompt" name="Issues[${newIndex - 1}].Prompt" rows="2"></textarea>
+                </div>
+                <div class="flex-col">
+                    <label for="issue${newIndex}field">Field</label>
+                    <div class="custom-dropdown-wrapper">
+                        <select id="issue${newIndex}field" name="Issues[${newIndex - 1}].Field" class="custom-dropdown">
+                            <option value="">Select Single-Choice Field</option>
+                            ${options}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.getElementById("issues").appendChild(newCard);
+        createCustomDropdown(newCard.querySelector('select'));
+        reNumberIssues();
+    }
+
+    function reNumberPrivTypes() {
+        var cards = document.querySelectorAll("#privtypes .privtype-card");
+        for (var i = 0; i < cards.length; i++) {
+            var card = cards[i];
+
+            var heading = card.querySelector("h2.section-subtitle");
+            heading.childNodes[0].nodeValue = "Custom Priv Type " + (i + 1) + " ";
+
+            var nameInput = card.querySelector('input[type="text"]');
+            nameInput.id = "privtypeName" + (i + 1);
+            nameInput.name = "CustomPrivTypes[" + i + "].CustomPrivilegeName";
+
+            var textArea = card.querySelector("textarea");
+            textArea.id = "privtypePrompt" + (i + 1);
+            textArea.name = "CustomPrivTypes[" + i + "].CustomPrivilegePrompt";
+        }
+
+        updateAddPrivTypeButtonVisibility();
+    }
+
+    function removePrivType(button) {
+        var card = button.closest(".privtype-card");
+        card.parentNode.removeChild(card);
+        reNumberPrivTypes();
+    }
+
+    function updateAddPrivTypeButtonVisibility() {
+        var privTypeCards = document.querySelectorAll("#privtypes .privtype-card");
+        var addButton = document.querySelector(".add-privtype");
+
+        if (privTypeCards.length >= maxPrivTypes) {
+            addButton.style.display = "none";
+        } else {
+            addButton.style.display = "inline-block";
+        }
+    }
+
+    document.querySelector(".add-privtype").addEventListener("click", addPrivType);
+
+    function addPrivType() {
+        var privTypeCards = document.querySelectorAll("#privtypes .privtype-card");
+
+        if (privTypeCards.length >= maxPrivTypes) {
+            return;
+        }
+
+        var nextIndex = privTypeCards.length + 1;
+
+        var newCard = document.createElement("div");
+        newCard.className = "privtype-card";
+        newCard.innerHTML = `
+            <div class="flex-col gap-lg">
+                <h2 class="section-subtitle priv-header">
+                    Custom Priv Type ${nextIndex}
+                    <span class="bi bi-x close-icon remove-privtype" onclick="removePrivType(this)"></span>
+                </h2>
+                <div class="flex-col">
+                    <label for="privtypeName${nextIndex}">Custom Privilege Name</label>
+                    <input type="text" id="privtypeName${nextIndex}" name="CustomPrivTypes[${nextIndex - 1}].CustomPrivilegeName" placeholder="" />
+                </div>
+                <div class="flex-col">
+                    <label for="privtypePrompt${nextIndex}">Custom Privilege Prompt</label>
+                    <textarea id="privtypePrompt${nextIndex}" name="CustomPrivTypes[${nextIndex - 1}].CustomPrivilegePrompt" rows="2" placeholder=""></textarea>
+                </div>
+            </div>
+        `;
+        document.getElementById("privtypes").appendChild(newCard);
+        reNumberPrivTypes();
+    }
+
+    function updateJobTypeDisplay() {
+        var selected = document.querySelector('input[name="JobType"]:checked');
+        var jobType = selected ? selected.value : "";
+
+        var relevance = document.getElementById("relevance");
+        var privilege = document.getElementById("privilege");
+        var piiDetectExtract = document.getElementById("piiDetectExtract");
+        var earlycase = document.getElementById("earlycase");
+
+        relevance.classList.toggle("hidden", jobType !== "Relevance");
+        privilege.classList.toggle("hidden", jobType !== "Privilege");
+        piiDetectExtract.classList.toggle("hidden", jobType !== "PII Detect and Extract");
+        earlycase.classList.toggle("hidden", jobType !== "Early Case Intelligence");
+    }
+
+    function validateStep(stepNumber) {
+        let step = document.getElementById(`form-step-${stepNumber}`);
+        if (!step) return false; // Ensure the step exists
+
+        if (stepNumber == 2) {
+            var selected = document.querySelector('input[name="JobType"]:checked');
+            var jobType = selected ? selected.value : "";
+
+            if (jobType == 'Relevance') 
+                step = document.getElementById("relevance");
+            else if (jobType == 'Privilege')
+                step = document.getElementById("privilege");
+            else if (jobType == 'PII Detect and Extract')
+                step = document.getElementById("piiDetectExtract");
+            else if (jobType == 'Early Case Intelligence')
+                step = document.getElementById("earlycase");
+        }
+
+        let isValid = true;
+
+        // Select all required inputs, textareas, and selects within the step
+        const fields = step.querySelectorAll("input, textarea");
+
+        const processedRadioGroups = new Set();
+
+        fields.forEach(field => {
+            if (field.type === "radio") {
+                // Validate radio groups by checking if at least one is checked
+                if (!processedRadioGroups.has(field.name)) {
+                    const radioGroup = step.querySelectorAll(`input[name="${field.name}"]`);
+                    const isChecked = Array.from(radioGroup).some(radio => radio.checked);
+
+                    radioGroup.forEach(radio => radio.classList.remove("error"));
+
+                    if (!isChecked) {
+                        setTimeout(() => {
+                            radioGroup.forEach(radio => radio.classList.add("error"));
+                        }, 100)
+                        isValid = false;
+                    } else {
+                        radioGroup.forEach(radio => radio.classList.remove("error"));
+                    }
+
+                    processedRadioGroups.add(field.name);
+                }
+            } else {
+                if (field.value.trim() === "") {
+                    field.classList.add("error"); // Highlight the field if empty
+                    isValid = false;
+                } else {
+                    field.classList.remove("error"); // Remove error class if valid
+                }
+            }
+        });
+
+        return isValid;
+    }
+
+    function getOptionText(name, value) {
+        const select = document.querySelector(`select[name="${name}"]`);
+        
+        if (!select) return null; 
+
+        const option = select.querySelector(`option[value="${value}"]`);
+        
+        return option ? option.textContent : null; // Return the option's text
+    }
+
+    function generatePreview() {
+        var selected = document.querySelector('input[name="JobType"]:checked');
+        var jobType = selected ? selected.value : "";
+        var previewEle = document.getElementById('job-configuration');
+        const formData = getFormData();
+
+        function printIssues() {
+            var issueCards = document.querySelectorAll("#issues .issue-card");
+            var text = "";
+            issueCards.forEach((item, index) => {
+                var fieldName = getOptionText(`Issues[${index}].Field`, formData[`Issues[${index}].Field`]);
+                var prompt = formData[`Issues[${index}].Prompt`];
+                text += `
+                    <div class="field flex-col">
+                        <div class="flex-col section-medium-title">Issue ${index + 1}</div>
+                        <div class="pl-4 field-label section-small-title">Field</div>
+                        <div class="pl-4 field-content">${fieldName}</div>
+                        <div class="pl-4 field-label section-small-title">Prompt</div>
+                        <div class="pl-4 field-content">${prompt}</div>
+                    </div>
+                `;
+            })
+            return text;
+        }
+        function printCustomPrivTypes() {
+            var privCards = document.querySelectorAll("#privtypes .privtype-card");
+            var text = "";
+            privCards.forEach((item, index) => {
+                var name = getOptionText(`CustomPrivTypes[${index}].CustomPrivilegeName`, formData[`CustomPrivTypes[${index}].CustomPrivilegeName`]);
+                var prompt = formData[`CustomPrivTypes[${index}].CustomPrivilegePrompt`];
+                text += `
+                    <div class="field flex-col">
+                        <div class="flex-col section-medium-title">Custom Priv Type ${index + 1}</div>
+                        <div class="pl-4 field-label section-small-title">Custom Privilege Name</div>
+                        <div class="pl-4 field-content">${name}</div>
+                        <div class="pl-4 field-label section-small-title">Custom Privilege Prompt</div>
+                        <div class="pl-4 field-content">${prompt}</div>
+                    </div>
+                `;
+            })
+            return text;
+        }
+
+        function printNormalCol(title, content, half = false) {
+            return `
+                <div class="field flex-col ${half ? 'half-width' : ''}">
+                    <div class="field-label section-medium-title">${title}</div>
+                    <div class="field-content">${content}</div>
+                </div>
+            `;
+        }
+
+        function printJobType(name) {
+            return `<div class="flex-col section-small-title">${name}</div>`;
+        }
+
+        document.getElementById('preview-job-title').innerText = formData.JobName;
+        document.getElementById('preview-matter-number').innerText = "Matter Number: #" + formData.MatterNumber;
+        document.getElementById('preview-job-type').innerText = formData.JobType;
+
+        if (formData.JobType == 'Relevance') {
+            previewEle.innerHTML = `
+                ${printJobType('Relevance Job Configuration')}
+                ${printNormalCol('General Information', formData.GeneralInformation)}
+                ${printIssues()}
+                ${printNormalCol('Review PDFs as Images', formData.ReviewPdfsAsImages ? "Yes" : "No")}
+            `
+        } else if (formData.JobType == 'Privilege') {
+            previewEle.innerHTML = `
+                ${printJobType('Privilege Job Configuration')}
+                ${printNormalCol('Privilege Types', (!formData.AttorneyClient && !formData.WorkProduct) ? 'None' : ((formData.AttorneyClient && "Attorney-Client ") + (formData.WorkProduct && "Work Product")) )}
+                ${printCustomPrivTypes()}
+                <div class="flex-row flex-wrap">
+                    ${printNormalCol('Attoney List', formData.AttorneyList, true)}
+                    ${printNormalCol('Safe Domains', formData.SafeDomains, true)}
+                </div>
+                <div class="flex-row flex-wrap">
+                    ${printNormalCol('Classification', getOptionText("Classification", formData.Classification), true)}
+                    ${printNormalCol('Explanation', getOptionText("Explanation", formData.Explanation), true)}
+                </div>
+                <div class="flex-row flex-wrap">
+                    ${printNormalCol('Type Result', getOptionText("TypeResult", formData.TypeResult), true)}
+                    ${printNormalCol('Log Entry', getOptionText("LogEntry", formData.LogEntry), true)}
+                </div>
+                ${printNormalCol('Hit Result', getOptionText("HitResult", formData.HitResult))}
+            `
+        } else if (formData.JobType == 'PII Detect and Extract') {
+            previewEle.innerHTML = `
+                ${printJobType('PII Detect and Extract')}
+                ${printNormalCol('PII Detection Field', getOptionText('DetectionField', formData.DetectionField))}
+                
+                <div class="flex-row flex-wrap">
+                    ${printNormalCol('Extract PII', formData.ExtractPii ? "Yes" : "No", true)}
+                    ${printNormalCol('PII Extraction Field', formData.ExtractionField, true)}
+                </div>
+            `
+        } else if (formData.JobType == 'Early Case Intelligence') {
+            previewEle.innerHTML = `
+                ${printJobType('Early Case Intelligence')}
+                ${printNormalCol('Case Background', formData.CaseBackground)}
+                ${printNormalCol('Relevant Description', formData.RelevantDescription)}
+                ${printNormalCol('Not Relevant Description', formData.NotRelevantDescription)}
+                
+                <div class="flex-row flex-wrap">
+                    ${printNormalCol('Classification Results', getOptionText('ClassificationResults', formData.ClassificationResults), true)}
+                    ${printNormalCol('Summary Results', getOptionText('SummaryResults', formData.SummaryResults), true)}
+                </div>
+                <div class="flex-row flex-wrap">
+                    ${printNormalCol('Document Type Results', getOptionText('DocumentTypeResults', formData.DocumentTypeResults), true)}
+                    ${printNormalCol('Relevant Topic Results', getOptionText('RelevantTopicResults', formData.RelevantTopicResults), true)}
+                </div>
+                <div class="flex-row flex-wrap">
+                    ${printNormalCol('Not Relevant Topic Results', getOptionText('NotRelevantTopicResults', formData.NotRelevantTopicResults), true)}
+                    ${printNormalCol('Inappropriate Content Results', getOptionText('InappropriateContentResults', formData.InappropriateContentResults), true)}
+                </div>
+            `
+        }
+    }
+
+    function updateButtons() {
+        if (currentStep == totalSteps) {
+            document.querySelector('#submit').hidden = false;
+            document.querySelector('#print').hidden = false;
+            document.querySelector('#next').hidden = true;
+        } else {
+            document.querySelector('#submit').hidden = true;
+            document.querySelector('#print').hidden = true;
+            document.querySelector('#next').hidden = false;
+        }
+
+        if (currentStep == 1) {
+            document.querySelector('#back').disabled = true;
+        } else {
+            document.querySelector('#back').disabled = false;
+        }
+    }
+
+    function updateStepContent() {
+        document.querySelectorAll('.form-step').forEach((element, index) => {
+            element.classList.add('hidden');
+        });
+        document.querySelector(`#form-step-${currentStep}`).classList.remove('hidden');
+    }
+
+    function updateStepDivides() {
+        document.querySelectorAll('.step').forEach((element, index) => {
+            if (index < currentStep)
+                element.classList.add('active');
+            else
+                element.classList.remove('active');
+        });
+        document.querySelectorAll('.step-divide').forEach((element, index) => {
+            if (index < currentStep)
+                element.classList.add('active');
+            else
+                element.classList.remove('active');
+        });
+    }
+
+    function nextStep() {
+        if (currentStep < totalSteps && validateStep(currentStep)) {
+            currentStep ++;
+
+            updateStepContent();
+            updateStepDivides();
+            updateButtons();
+
+            if (currentStep == 3) {
+                generatePreview();
+            }
+        }
+    }
+
+    function backStep() {
+        if (currentStep > 1) {
+            currentStep --;
+
+            updateStepContent();
+            updateStepDivides();
+            updateButtons();
+        }
+    }
+    function printPreview() {
+        window.print();
+    } 
+
+    document.querySelector('#print').addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        printPreview();
+    })
+    document.querySelector('#next').addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        nextStep();
+    })
+    document.querySelector('#back').addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        backStep();
+    })
+    document.querySelector('.back-step-link').addEventListener("click", () => {
+        e.preventDefault();
+        e.stopPropagation();
+        backStep();
+    })
+
+    document.addEventListener("input", function (event) {
+        if (event.target.matches("textarea")) {
+            event.target.style.height = "auto";
+            event.target.style.height = event.target.scrollHeight + "px";
+        }
+
+        if (event.target.classList.contains("error")) {
+            event.target.classList.remove("error");
+        }
+    });
+    // Custom Select
+
+    document.addEventListener("click", function (event) {
+        // Open dropdown when clicking the selected area
+        if (event.target.classList.contains("selected")) {
+            toggleDropdown(event.target);
+        }
+
+        // Select option and update the hidden <select> value
+        if (event.target.matches(".dropdown-options li")) {
+            selectOption(event.target);
+        }
+
+        // Close dropdowns when clicking outside
+        if (!event.target.closest(".custom-dropdown-wrapper")) {
+            document.querySelectorAll(".custom-dropdown-wrapper").forEach(wrapper => {
+                wrapper.classList.remove("active");
+            });
+        }
+    });
+
+    function toggleDropdown(selectedElement) {
+        const dropdownWrapper = selectedElement.closest(".custom-dropdown-wrapper");
+
+        // Close all other dropdowns before opening the clicked one
+        document.querySelectorAll(".custom-dropdown-wrapper").forEach(wrapper => {
+            if (wrapper !== dropdownWrapper) {
+                wrapper.classList.remove("active");
+            }
+        });
+
+        dropdownWrapper.classList.toggle("active");
+    }
+
+    function selectOption(option) {
+        const dropdownWrapper = option.closest(".custom-dropdown-wrapper");
+        const selectedElement = dropdownWrapper.querySelector(".selected");
+        const selectElement = dropdownWrapper.querySelector("select");
+
+        // Update the visible selected text
+        selectedElement.textContent = option.textContent;
+        
+        // Update the hidden <select> field for form submission
+        selectElement.value = option.getAttribute("data-value");
+
+        // Close the dropdown
+        dropdownWrapper.classList.remove("active");
+    }
+
+    function initCustomSelects() {
+        document.querySelectorAll("select.custom-dropdown").forEach(select => {
+            createCustomDropdown(select);
+        });
+    }
+
+    function createCustomDropdown(select) {
+        // Create dropdown wrapper
+        const wrapper = select.parentNode;
+
+        // Create selected element
+        const selected = document.createElement("div");
+        selected.classList.add("selected");
+        selected.textContent = select.options[select.selectedIndex]?.text || "Select an option";
+        selected.setAttribute("data-for", select.id);
+
+        // Create options list
+        const dropdownList = document.createElement("ul");
+        dropdownList.classList.add("dropdown-options");
+
+        const caretElement = document.createElement("span");
+        caretElement.className = "bi bi-chevron-down custom-dropdown-caret-icon";
+
+        // Populate options
+        Array.from(select.options).forEach(option => {
+            const li = document.createElement("li");
+            li.textContent = option.text;
+            li.setAttribute("data-value", option.value);
+            dropdownList.appendChild(li);
+        });
+
+        // Append elements
+        wrapper.appendChild(selected);
+        wrapper.appendChild(dropdownList);
+        wrapper.appendChild(caretElement)
+
+        // Insert before the original select (so it's replaced)
+    }
+
+    function getFormData() {
+        const form = document.getElementById("jobForm");
+        const formData = new FormData(form);
+
+        // Convert FormData to an object
+        const data = {};
+        formData.forEach((value, key) => {
+            data[key] = value;
+        });
+
+        console.log(data); // Log form data
+        return data;
+    }
+
+    document.querySelectorAll('input[name="JobType"]').forEach(function (radio) {
+        radio.addEventListener("change", updateJobTypeDisplay);
+    });
+
+    updateJobTypeDisplay();
+
+    document.addEventListener("DOMContentLoaded", function () {
+        reNumberIssues();
+        reNumberPrivTypes();
+        initCustomSelects();
+
+        var extractCheck = document.getElementById("ExtractPii");
+        var extractSection = document.getElementById("extractPiiFieldSection");
+        if (extractCheck) {
+            extractCheck.addEventListener("change", function () {
+                if (this.checked) {
+                    extractSection.classList.remove("hidden");
+                } else {
+                    extractSection.classList.add("hidden");
+                }
+            });
+
+            if (extractCheck.checked) {
+                extractSection.classList.remove("hidden");
+            }
+        }
+    });
+</script>
