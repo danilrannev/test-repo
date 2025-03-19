@@ -19,7 +19,7 @@
                         </h4>
                         <div class="steps-container">
                             <div class="step-divide hidden" id="step-1-divide"></div>
-                            <div class="step active" id="step-1">
+                            <div class="step active current-step" id="step-1">
                                 <div class="step-number">
                                     1
                                 </div>
@@ -91,6 +91,20 @@
                                     </label>
                                     <div class="radio-group" id="typeofjob" name="JobType">
                                         <label class="radio-container">
+                                            <input type="radio" name="JobType" value="Early Case Intelligence" />
+                                            <div class="radio-wrapper">
+                                                <img src="./intelligence.svg" width="48" height="48"/>
+                                                <div class="content">
+                                                    <span class="job-type">
+                                                        Early Case Intelligence
+                                                    </span>
+                                                    <span class="job-type-description">
+                                                        Gain early insights into case documents
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </label>
+                                        <label class="radio-container">
                                             <input type="radio" name="JobType" value="Relevance" />
                                             <div class="radio-wrapper">
                                                 <img src="./document.svg" width="48" height="48"/>
@@ -128,20 +142,6 @@
                                                     </span>
                                                     <span class="job-type-description">
                                                         Find and extract personally identifiable information
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </label>
-                                        <label class="radio-container">
-                                            <input type="radio" name="JobType" value="Early Case Intelligence" />
-                                            <div class="radio-wrapper">
-                                                <img src="./intelligence.svg" width="48" height="48"/>
-                                                <div class="content">
-                                                    <span class="job-type">
-                                                        Early Case Intelligence
-                                                    </span>
-                                                    <span class="job-type-description">
-                                                        Gain early insights into case documents
                                                     </span>
                                                 </div>
                                             </div>
@@ -1044,11 +1044,17 @@
         }
 
         function updateStepDivides() {
+            document.querySelector(`.current-step`).classList.remove('current-step');
+
             document.querySelectorAll('.step').forEach((element, index) => {
                 if (index < currentStep)
                     element.classList.add('active');
                 else
                     element.classList.remove('active');
+
+                if (index == currentStep - 1) {
+                    element.classList.add('current-step');
+                }
             });
             document.querySelectorAll('.step-divide').forEach((element, index) => {
                 if (index < currentStep)
@@ -1100,10 +1106,12 @@
             e.stopPropagation();
             backStep();
         })
-        document.querySelector('.back-step-link').addEventListener("click", () => {
-            e.preventDefault();
-            e.stopPropagation();
-            backStep();
+        document.querySelectorAll('.back-step-link').forEach(ele => {
+            ele.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                backStep();
+            })
         })
 
         document.addEventListener("input", function (event) {

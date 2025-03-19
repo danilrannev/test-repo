@@ -194,6 +194,18 @@ body {
     font-weight: 600;
 }
 
+@media only screen and (max-width: 500px) {
+    .steps-container .step {
+        display: none;
+    }
+    .steps-container .step-divide {
+        display: none;
+    }
+    .steps-container .step.current-step {
+        display: flex;
+    }
+}
+
 /*
     Header & Logo
 */
@@ -491,6 +503,22 @@ button:not(:disabled):hover, .btn:not(:disabled):hover, input[type="submit"]:not
     cursor: pointer;
     border-radius: 8px;
     border: 2px solid #E5E7EB;
+}
+
+@media only screen and (max-width: 500px) {
+    .radio-container {
+        min-width: unset;
+        flex-basis: 100%;
+    }
+    .radio-wrapper {
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+    }
+    .half-width {
+        min-width: unset;
+        flex-basis: 100%;
+    }
 }
 
 @keyframes blink-border {
