@@ -7,7 +7,7 @@
         <div class="page-container">
             <div class="page-header">
                 <div class="container page-header-container">
-                    <img src="./light logo.png" alt="eDiscovery AI Logo" class="logo" />
+                    <img src="./assets/logo.png" alt="eDiscovery AI Logo" class="logo" />
                     <span class="bi bi-x close-icon no-print" onclick="closeModal()"></span>
                 </div>
             </div>
@@ -93,7 +93,7 @@
                                         <label class="radio-container">
                                             <input type="radio" name="JobType" value="Early Case Intelligence" />
                                             <div class="radio-wrapper">
-                                                <img src="./intelligence.svg" width="48" height="48"/>
+                                                <img src="./assets/intelligence.svg" width="48" height="48"/>
                                                 <div class="content">
                                                     <span class="job-type">
                                                         Early Case Intelligence
@@ -107,7 +107,7 @@
                                         <label class="radio-container">
                                             <input type="radio" name="JobType" value="Relevance" />
                                             <div class="radio-wrapper">
-                                                <img src="./document.svg" width="48" height="48"/>
+                                                <img src="./assets/document.svg" width="48" height="48"/>
                                                 <div class="content">
                                                     <span class="job-type">
                                                         Relevance
@@ -121,7 +121,7 @@
                                         <label class="radio-container">
                                             <input type="radio" name="JobType" value="Privilege" />
                                             <div class="radio-wrapper">
-                                                <img src="./shield.svg" width="48" height="48"/>
+                                                <img src="./assets/shield.svg" width="48" height="48"/>
                                                 <div class="content">
                                                     <span class="job-type">
                                                         Privilege
@@ -135,7 +135,7 @@
                                         <label class="radio-container">
                                             <input type="radio" name="JobType" value="PII Detect and Extract" />
                                             <div class="radio-wrapper">
-                                                <img src="./profile.svg" width="48" height="48"/>
+                                                <img src="./assets/profile.svg" width="48" height="48"/>
                                                 <div class="content">
                                                     <span class="job-type">
                                                         PII Detect and Extract
@@ -601,7 +601,7 @@
             </div>
             <div class="page-footer no-print">
                 <div class="page-footer-wrapper container flex">
-                    <a href="#" class="btn btn-outline" id="back" disabled>Back</a>
+                    <a href="#" class="btn btn-outline disabled" id="back">Back</a>
                     <div class="flex submission-buttons">
                         <a href="#" class="btn" id="next">Next</a>
                         <a href="#" class="btn btn-secondary" id="print" hidden>Print</a>
@@ -1031,8 +1031,10 @@
 
             if (currentStep == 1) {
                 document.querySelector('#back').disabled = true;
+                document.querySelector('#back').classList.add('disabled');
             } else {
                 document.querySelector('#back').disabled = false;
+                document.querySelector('#back').classList.remove('disabled');
             }
         }
 

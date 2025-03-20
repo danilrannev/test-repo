@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css");
 
 :root {
-    --primary-color: #9333EA;
-    --secondary-color: #5146E6;
+    --primary-color: #3EC3D8;
+    --secondary-color: #005565;
     --text-grey: #4B5563;
     --text-dark-grey: #374151;
     --text-dark: #1F2937;
@@ -14,13 +14,14 @@
     --form-max-width: 1120px;
     --label__font-size: 12px;
     --input__border: 1px solid var(--color-grey);
-    --page-header-banner: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-    --hover-bg: #9333EA10;
+    --page-header-banner: linear-gradient(90deg, var(--secondary-color), #073F48);
+    --hover-bg: #078EA632;
     --dropdown-bg: #ffffff;
     --dropdown-text-color: #777777;
     --dropdown-border-color: #D8D8D8;
     --dropdown-size: 14px;
     --dropdown-hover-bg: var(--hover-bg);
+    --max-logo-height: 44px;
 }
  
 /*
@@ -29,7 +30,7 @@
 body {
     background-color: var(--background);
     margin: 0;
-    font-family: "Inter", sans-serif;
+    font-family: "Open Sans", sans-serif;
     font-optical-sizing: auto;
 }
 
@@ -52,8 +53,8 @@ body {
 }
 
 .page-header-container {
-    padding-top: 16px;
-    padding-bottom: 16px;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
  
 .page-header {
@@ -78,7 +79,7 @@ body {
 .page-body {
     position: relative;
     margin: 0 auto;
-    margin-top: 16px;
+    margin-top: 32px;
     margin-bottom: 68px;
 }
  
@@ -188,7 +189,7 @@ body {
 
 .step.active .step-number {
     background: white;
-    color: var(--primary-color);
+    color: var(--secondary-color);
 }
 .step.active .step-name {
     font-weight: 600;
@@ -210,14 +211,14 @@ body {
     Header & Logo
 */
 .page-header img.logo {
-    max-height: 32px;
+    max-height: var(--max-logo-height);
 }
  
 .page-header .close-icon {
     float: right;
     cursor: pointer;
     font-size: 24px;
-    margin-top: 3px;
+    margin-top: 6px;
     font-weight: bold;
     color: var(--text-dark);
 }
@@ -438,7 +439,7 @@ button, .btn, input[type="submit"] {
     text-decoration: none;
 }
 
-button:disabled, .btn:disabled, input[type="submit"]:disabled {
+button:disabled, .btn.disabled, .btn:disabled, input[type="submit"]:disabled {
     background-color: var(--color-grey);
     border-color: var(--color-grey);
     cursor: default;
@@ -454,7 +455,7 @@ button:disabled, .btn:disabled, input[type="submit"]:disabled {
     background-color: var(--secondary-color);
 }
 
-.btn.btn-outline:disabled {
+.btn.btn-outline:disabled, .btn.btn-outline.disabled, .btn.btn-outline.disabled:hover {
     background-color: transparent;
     border-color: var(--color-grey);
     color: var(--color-grey);
@@ -464,7 +465,7 @@ button:not(:disabled):hover, .btn:not(:disabled):hover, input[type="submit"]:not
     background-color: var(--secondary-color);
 }
 
-.btn.btn-outline:not(:disabled):hover {
+.btn.btn-outline:hover {
     background-color: var(--primary-color);
     color: white;
 }
